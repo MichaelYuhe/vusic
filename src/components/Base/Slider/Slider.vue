@@ -35,6 +35,7 @@ export default {
   },
   setup() {
     const rootRef = ref(null);
+    // 将slider响应式传入useSlider
     const { currentPageIndex } = useSlider(rootRef);
 
     return {

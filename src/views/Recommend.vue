@@ -2,11 +2,13 @@
   <div class="recommend" v-loading="loading">
     <Scroll class="recommend-content">
       <div>
+        <!-- 轮播图 -->
         <div class="slider-wrapper">
           <div class="slider-content">
             <Slider v-if="sliders.length" :sliders="sliders" />
           </div>
         </div>
+        <!-- 推荐列表 -->
         <div class="recommend-list">
           <h1 class="list-title" v-show="!loading">热门歌单</h1>
           <ul>
@@ -54,9 +56,10 @@ export default {
   },
   computed: {
     loading() {
-      return !this.sliders.length && !this.albums.length
-    }
-  }
+      // 没获取到全部数据时始终为loading
+      return !this.sliders.length && !this.albums.length;
+    },
+  },
 };
 </script>
 
@@ -94,10 +97,14 @@ export default {
       }
       .item {
         display: flex;
+        width: 90%;
         box-sizing: border-box;
         align-items: center;
-        padding: 0 20px 20px 20px;
-
+        padding: 5px 20px;
+        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.4);
+        border-radius: 8px;
+        margin: 10px auto;
+        transition: all 0.3s ease-in-out;
         .icon {
           flex: 0 0 60px;
           width: 60px;
@@ -110,15 +117,23 @@ export default {
           flex: 1;
           line-height: 20px;
           overflow: hidden;
-          font-size: $font-size-medium;
         }
         .name {
           margin-bottom: 10px;
+          font-size: $font-size-medium;
           color: $color-text;
+          font-weight: bold;
         }
         .title {
           color: $color-text-d;
+          font-size: $font-size-small;
         }
+        :focus {
+          transform: scale(1.03);
+        }
+      }
+      :first-child {
+        margin-top: 0;
       }
     }
   }
