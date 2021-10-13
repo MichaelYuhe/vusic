@@ -64,7 +64,6 @@ export default {
     const res = await getSingerDetail(this.computedSinger);
     this.songs = await processSongs(res.songs);
     this.loading = false;
-    console.log(this.songs)
   },
 };
 </script>

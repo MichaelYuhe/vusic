@@ -2,16 +2,19 @@
   <Header />
   <Tab />
   <router-view/>
+  <Player />
 </template>
 
 <script>
 import Header from '@/components/Header/Header'
 import Tab from '@/components/Tab/Tab'
+import Player from '@/components/Player/Player'
 export default {
   name: 'App',
   components: {
     Header,
-    Tab
+    Tab,
+    Player
   }
 }
 </script>
