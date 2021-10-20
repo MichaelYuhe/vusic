@@ -52,10 +52,12 @@ export default {
   },
   methods: {
     onTouchStart(e) {
+      // 手指按下，获取当前按下的坐标
       this.touch.x1 = e.touches[0].pageX;
       this.touch.beginWidth = this.$refs.progress.clientWidth;
     },
     onTouchMove(e) {
+      // 手指拖动，坐标改变
       const delta = e.touches[0].pageX - this.touch.x1;
       const tempWidth = this.touch.beginWidth + delta;
       const barWidth = this.$el.clientWidth - progressBtnWidth;
@@ -64,11 +66,13 @@ export default {
       this.$emit("progress-changing", progress);
     },
     onTouchEnd() {
+      // 手指松开
       const barWidth = this.$el.clientWidth - progressBtnWidth;
       const progress = this.$refs.progress.clientWidth / barWidth;
       this.$emit("progress-changed", progress);
     },
     onClick(e) {
+      // 点击进度条某一位置直接跳转相应的进度
       const rect = this.$el.getBoundingClientRect();
       const offsetWidth = e.pageX - rect.left;
       const barWidth = this.$el.clientWidth - progressBtnWidth;
@@ -90,7 +94,7 @@ export default {
     .progress {
       position: absolute;
       height: 100%;
-      background: $color-theme;
+      background: black;
     }
     .progress-btn-wrapper {
       position: absolute;
@@ -103,11 +107,11 @@ export default {
         top: 7px;
         left: 7px;
         box-sizing: border-box;
-        width: 16px;
-        height: 16px;
-        border: 3px solid $color-text;
+        width: 14px;
+        height: 14px;
+        border: 2px solid $color-text;
         border-radius: 50%;
-        background: $color-theme;
+        background: black;
       }
     }
   }

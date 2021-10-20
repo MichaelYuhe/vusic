@@ -4,7 +4,7 @@
  */
 const axios = require('axios')
 const pinyin = require('pinyin')
-// const Base64 = require('js-base64').Base64
+const Base64 = require('js-base64').Base64
 // 获取签名方法
 const getSecuritySign = require('./sign')
 
@@ -214,7 +214,7 @@ function registerRecommend(app) {
 function registerSingerList(app) {
   app.get('/api/getSingerList', (req, res) => {
     const url = 'https://u.y.qq.com/cgi-bin/musics.fcg'
-    const HOT_NAME = '热'
+    const HOT_NAME = '热门歌手'
 
     const data = JSON.stringify({
       comm: { ct: 24, cv: 0 },

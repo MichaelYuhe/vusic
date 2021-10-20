@@ -116,7 +116,7 @@ export default {
       padding: 10px 10px 10px 30px;
       margin: 10px auto;
       box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
-      border-radius: 5px;
+      // border-radius: 5px;
       // background-color: #fff;
       .avatar {
         width: 50px;

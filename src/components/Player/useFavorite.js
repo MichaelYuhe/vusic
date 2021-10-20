@@ -4,12 +4,12 @@ import { FAVORITE_KEY } from "../../assets/js/constant";
 import { save, remove } from "../../assets/js/array_store";
 
 export default function useFavorite() {
+    const maxLen = 100
     const store = useStore()
     const favoriteList = computed(() => store.state.favoriteList)
-    const maxLen = 100
 
     function getFavoriteIcon(song) {
-        return isFavorite(song) ? 'icon-favorite' : 'icon-not-favorite'
+        return isFavorite(song) ? 'fas fa-heart' : 'far fa-heart'
     }
 
     // 歌曲是否在收藏列表里
@@ -21,7 +21,7 @@ export default function useFavorite() {
 
     function toggleFavorite(song) {
         let list
-        if(isFavorite(song)) {
+        if (isFavorite(song)) {
             list = remove(FAVORITE_KEY, compare)
         }
         else {

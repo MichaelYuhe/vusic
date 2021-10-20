@@ -1,20 +1,65 @@
 <template>
-  <div class="player">
+  <div class="player" v-show="playList.length">
     <div class="normal-player" v-show="fullScreen">
-      <div class="background">
-        <img :src="currentSong.pic" />
-      </div>
       <div class="top">
         <div class="back" @click="goBack">
-          <i class="icon-back"></i>
+          <i class="fas fa-angle-down"></i>
         </div>
-        <h1 class="title">{{ currentSong.name }}</h1>
-        <h2 class="subtitle">{{ currentSong.singer }}</h2>
       </div>
-      <div class="medium"></div>
+      <div
+        class="middle"
+        @touchstart.prevent="onMiddleTouchStart"
+        @touchmove.prevent="onMiddleTouchMove"
+        @touchend.prevent="onMiddleTouchEnd"
+      >
+        <div class="middle-l" :style="middleLStyle">
+          <div class="cd-wrapper">
+            <div class="cd">
+              <img class="image" :src="currentSong.pic" />
+            </div>
+          </div>
+          <div class="playing-lyric-wrapper">
+            <div class="playing-lyric">{{ playingLyric }}</div>
+          </div>
+        </div>
+        <Scroll ref="lyricScrollRef" class="middle-r" :style="middleRStyle">
+          <div class="lyric-wrapper">
+            <div ref="lyricListRef" v-if="currentLyric">
+              <p
+                class="text"
+                :class="{ current: currentLineNum === index }"
+                v-for="(line, index) in currentLyric.lines"
+                :key="line.num"
+              >
+                {{ line.txt }}
+              </p>
+            </div>
+            <div class="pure-music" v-show="pureMusicLyric">
+              <p>{{ pureMusicLyric }}</p>
+            </div>
+          </div>
+        </Scroll>
+      </div>
       <div class="bottom">
+        <div class="dot-wrapper">
+          <span class="dot" :class="{ active: currentShow === 'cd' }"></span>
+          <span class="dot" :class="{ active: currentShow === 'lyric' }"></span>
+        </div>
+        <div class="infor">
+          <div class="infor-title">
+            <h1 class="title">{{ currentSong.name }}</h1>
+            <h3 class="subtitle">{{ currentSong.singer }}</h3>
+          </div>
+          <div class="functions">
+            <div class="icon i-right">
+              <i
+                :class="getFavoriteIcon(currentSong)"
+                @click="toggleFavorite(currentSong)"
+              ></i>
+            </div>
+          </div>
+        </div>
         <div class="progress-wrapper">
-          <span class="time time-l">{{ formatTime(currentTime) }}</span>
           <div class="progress-bar-wrapper">
             <ProgressBar
               ref="barRef"
@@ -23,32 +68,30 @@
               @progress-changed="progressChanged"
             ></ProgressBar>
           </div>
-          <span class="time time-r">{{
-            formatTime(currentSong.duration)
-          }}</span>
+          <div class="time-infor">
+            <span class="time time-l">{{ formatTime(currentTime) }}</span> /
+            <span class="time time-r">{{
+              formatTime(currentSong.duration)
+            }}</span>
+          </div>
         </div>
         <div class="operators">
-          <div class="icon i-left">
+          <!-- <div class="icon i-left">
             <i :class="modeIcon" @click="changeMode"></i>
-          </div>
+          </div> -->
           <div class="icon i-left" :class="disableClass">
-            <i class="icon-prev" @click="prev"></i>
+            <i class="far fa-arrow-alt-circle-left" @click="prev"></i>
           </div>
           <div class="icon i-center" :class="disableClass">
             <i :class="playIcon" @click="togglePlay"></i>
           </div>
           <div class="icon i-right" :class="disableClass">
-            <i class="icon-next" @click="next"></i>
-          </div>
-          <div class="icon i-right">
-            <i
-              :class="getFavoriteIcon(currentSong)"
-              @click="toggleFavorite(currentSong)"
-            ></i>
+            <i class="far fa-arrow-alt-circle-right" @click="next"></i>
           </div>
         </div>
       </div>
     </div>
+    <MiniPlayer />
     <audio
       ref="audioRef"
       @pause="pause"
@@ -65,7 +108,11 @@ import { computed, watch, ref } from "vue";
 import { useStore } from "vuex";
 import useMode from "./useMode";
 import useFavorite from "./useFavorite";
+import useLyric from "./useLyric";
+import useMiddle from "./useMiddle";
 import ProgressBar from "./ProgressBar";
+import Scroll from "@/components/Base/Scroll/Scroll";
+import MiniPlayer from './MiniPlayer'
 import { formatTime } from "@/assets/js/util";
 import { PLAY_MODE } from "@/assets/js/constant";
 
@@ -73,6 +120,8 @@ export default {
   name: "Player",
   components: {
     ProgressBar,
+    Scroll,
+    MiniPlayer
   },
   setup() {
     // data
@@ -84,6 +133,24 @@ export default {
     // hooks
     const { modeIcon, changeMode } = useMode();
     const { getFavoriteIcon, toggleFavorite } = useFavorite();
+    const {
+      currentLyric,
+      currentLineNum,
+      pureMusicLyric,
+      playingLyric,
+      lyricScrollRef,
+      lyricListRef,
+      playLyric,
+      stopLyric,
+    } = useLyric({ songReady, currentTime });
+    const {
+      currentShow,
+      middleLStyle,
+      middleRStyle,
+      onMiddleTouchStart,
+      onMiddleTouchMove,
+      onMiddleTouchEnd,
+    } = useMiddle;
 
     //vuex
     const store = useStore();
@@ -96,7 +163,7 @@ export default {
 
     // computed
     const playIcon = computed(() => {
-      return playing.value ? "icon-pause" : "icon-play";
+      return playing.value ? "far fa-pause-circle" : "far fa-play-circle";
     });
     const disableClass = computed(() => {
       return songReady.value ? "" : "disable";
@@ -124,6 +191,12 @@ export default {
         return;
       }
       const audioElement = audioRef.value;
+      if (newPlaying) {
+        playLyric();
+      } else {
+        audioElement.pause();
+        stopLyric();
+      }
       newPlaying ? audioElement.play() : audioElement.pause();
     });
 
@@ -184,8 +257,8 @@ export default {
     function loop() {
       const audioElement = audioRef.value;
       audioElement.currentTime = 0;
-      audioElement.play()
-      store.commit('setPlayingState', true)
+      audioElement.play();
+      store.commit("setPlayingState", true);
     }
 
     function ready() {
@@ -193,6 +266,7 @@ export default {
         return;
       }
       songReady.value = true;
+      playLyric();
     }
 
     function error() {
@@ -200,14 +274,17 @@ export default {
     }
 
     function updateTime(e) {
-      if (!progressChangingFlag) { // 如果正在改变进度，禁用updateTime方法
-        currentTime.value = e.target.currentTime; 
+      if (!progressChangingFlag) {
+        // 如果正在改变进度，禁用updateTime方法
+        currentTime.value = e.target.currentTime;
       }
     }
 
     function progressChanging(progress) {
       progressChangingFlag = true; // 正在改变进度
       currentTime.value = currentSong.value.duration * progress;
+      playLyric();
+      stopLyric();
     }
 
     function progressChanged(progress) {
@@ -217,6 +294,7 @@ export default {
       if (!playing.value) {
         store.commit("setPlayingState", true);
       }
+      playLyric();
     }
 
     function songEnd() {
@@ -233,6 +311,7 @@ export default {
       audioRef,
       currentTime,
       fullScreen,
+      playList,
       currentSong,
       playIcon,
       disableClass,
@@ -255,6 +334,22 @@ export default {
       // useFavorite
       getFavoriteIcon,
       toggleFavorite,
+      // useLyric
+      currentLyric,
+      currentLineNum,
+      pureMusicLyric,
+      playingLyric,
+      lyricScrollRef,
+      lyricListRef,
+      playLyric,
+      stopLyric,
+      // useMiddle
+      currentShow,
+      middleLStyle,
+      middleRStyle,
+      onMiddleTouchStart,
+      onMiddleTouchMove,
+      onMiddleTouchEnd,
     };
   },
 };
@@ -270,21 +365,6 @@ export default {
     bottom: 0;
     z-index: 150;
     background: $color-background;
-    .background {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      opacity: 0.6;
-      filter: blur(20px);
-
-      img {
-        width: 100%;
-        height: 100%;
-      }
-    }
     .top {
       position: relative;
       margin-bottom: 25px;
@@ -294,27 +374,10 @@ export default {
         left: 6px;
         z-index: 50;
       }
-      .icon-back {
+      .fa-angle-down {
         display: block;
         padding: 9px;
-        font-size: $font-size-large-x;
-        color: $color-theme;
-        transform: rotate(-90deg);
-      }
-      .title {
-        width: 70%;
-        margin: 0 auto;
-        line-height: 40px;
-        text-align: center;
-        @include no-wrap();
-        font-size: $font-size-large;
-        color: $color-text;
-      }
-      .subtitle {
-        line-height: 20px;
-        text-align: center;
-        font-size: $font-size-medium;
-        color: $color-text;
+        font-size: 22px;
       }
     }
     .middle {
@@ -339,9 +402,8 @@ export default {
           box-sizing: border-box;
           height: 100%;
           .cd {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
+            width: 90%;
+            height: 90%;
             img {
               position: absolute;
               left: 0;
@@ -349,8 +411,8 @@ export default {
               width: 100%;
               height: 100%;
               box-sizing: border-box;
-              border-radius: 50%;
-              border: 10px solid rgba(255, 255, 255, 0.1);
+              border-radius: 10px;
+              box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
             }
             .playing {
               animation: rotate 20s linear infinite;
@@ -358,6 +420,7 @@ export default {
           }
         }
         .playing-lyric-wrapper {
+          display: none;
           width: 80%;
           margin: 30px auto 0 auto;
           overflow: hidden;
@@ -371,7 +434,7 @@ export default {
         }
       }
       .middle-r {
-        display: inline-block;
+        display: none;
         vertical-align: top;
         width: 100%;
         height: 100%;
@@ -405,6 +468,7 @@ export default {
       .dot-wrapper {
         text-align: center;
         font-size: 0;
+        margin-bottom: 5px;
         .dot {
           display: inline-block;
           vertical-align: middle;
@@ -420,40 +484,75 @@ export default {
           }
         }
       }
+      .infor {
+        display: flex;
+        justify-content: space-between;
+        .infor-title {
+          margin-left: 25px;
+          text-align: left;
+          .title {
+            line-height: 40px;
+            @include no-wrap();
+            font-size: 23px;
+            font-weight: bold;
+            color: $color-text;
+          }
+          .subtitle {
+            line-height: 20px;
+            @include no-wrap();
+            font-size: 15px;
+            color: $color-text;
+            
+          }
+        }
+        .functions {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-right: 35px;
+          i {
+            font-size: 20px;
+          }
+        }
+      }
       .progress-wrapper {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         width: 80%;
         margin: 0px auto;
+        margin-top: 20px;
         padding: 10px 0;
-        .time {
-          color: $color-text;
-          font-size: $font-size-small;
-          flex: 0 0 40px;
-          line-height: 30px;
-          width: 40px;
-          &.time-l {
-            text-align: left;
-          }
-          &.time-r {
-            text-align: right;
+        .time-infor {
+          width: 100%;
+          text-align: right;
+          font-size: 5px;
+          .time {
+            color: black;
+
+            flex: 0 0 40px;
+            line-height: 5px;
+            width: 40px;
+            &.time-l {
+              text-align: left;
+            }
+            &.time-r {
+              text-align: right;
+            }
           }
         }
         .progress-bar-wrapper {
-          flex: 1;
+          width: 100%;
         }
       }
       .operators {
+        margin-top: 15px;
         display: flex;
         align-items: center;
         .icon {
           flex: 1;
-          color: $color-theme;
-          &.disable {
-            color: $color-theme-d;
-          }
           i {
-            font-size: 30px;
+            font-size: 33px;
           }
         }
         .i-left {
@@ -463,7 +562,7 @@ export default {
           padding: 0 20px;
           text-align: center;
           i {
-            font-size: 40px;
+            font-size: 44px;
           }
         }
         .i-right {
