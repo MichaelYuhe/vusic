@@ -34,6 +34,10 @@
           {
             name: '搜索',
             path: '/search'
+          },
+          {
+            name: '我的',
+            path: '/mylist'
           }
         ]
       }

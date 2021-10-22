@@ -6,6 +6,7 @@ import axios from 'axios'
 const ERR_OK = 0
 const baseURL = process.env.NODE_ENV === 'production' ? 'http://ustbhuangyi.com/music-next/' : '/'
 
+
 axios.defaults.baseURL = baseURL
 
 export function get(url, params) {

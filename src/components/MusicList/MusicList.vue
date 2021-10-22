@@ -177,11 +177,10 @@ export default {
   }
   .bg-image {
     position: relative;
-    // top: 30px;
-    width: 87%;
+    width: 96%;
     margin: 0 auto;
-    // margin-top: 10px;
-    border-radius: 30px;
+    margin-top: 6px;
+    border-radius: 40px;
     transform-origin: top;
     background-size: cover;
     height: 0;

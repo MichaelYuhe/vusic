@@ -1,22 +1,27 @@
 <template>
   <Header />
   <Tab />
-  <router-view/>
+
+  <router-view v-slot="{ Component }"> 
+    <keep-alive>
+      <component :is="Component"/>
+    </keep-alive>
+  </router-view>
   <Player />
 </template>
 
 <script>
-import Header from '@/components/Header/Header'
-import Tab from '@/components/Tab/Tab'
-import Player from '@/components/Player/Player'
+import Header from "@/components/Header/Header";
+import Tab from "@/components/Tab/Tab";
+import Player from "@/components/Player/Player";
 export default {
-  name: 'App',
+  name: "App",
   components: {
     Header,
     Tab,
-    Player
-  }
-}
+    Player,
+  },
+};
 </script>
 
 <style lang="scss">

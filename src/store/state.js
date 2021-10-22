@@ -9,6 +9,7 @@ const state = {
     currentIndex: 0,
     fullScreen: false, //  是否全屏展开
     favoriteList: load(FAVORITE_KEY), 
+    myLists: [],
 }
 
 export default state

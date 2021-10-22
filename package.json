@@ -10,11 +10,13 @@
   "dependencies": {
     "@better-scroll/core": "^2.4.2",
     "@better-scroll/observe-dom": "^2.4.2",
+    "@better-scroll/pull-up": "^2.4.2",
     "@better-scroll/slide": "^2.4.2",
     "axios": "^0.22.0",
     "core-js": "^3.6.5",
     "good-storage": "^1.1.1",
     "lyric-parser": "^1.0.1",
+    "throttle-debounce": "^3.0.1",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0",
     "vue3-lazy": "^1.0.0-alpha.1",

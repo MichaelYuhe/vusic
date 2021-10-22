@@ -1,8 +1,9 @@
 import { createApp } from 'vue'
-import { addClass, removeClass } from '@/assets/js/dom'
+import { appendClass, removeClass } from '@/assets/js/dom'
 
 const relativeCls = 'g-relative'
 
+// 创造自定义指令
 export default function createLoadingLikeDirective(Comp) {
   return {
     mounted(el, binding) {
